@@ -37,9 +37,10 @@ class GliderBDReader(object):
 
 class MergedGliderBDReader(object):
     '''
-    Creates two glider binary data readers.  One for
+    Takes two glider binary data readers: one for
     flight and one for science data.  Provides an
-    iterator that returns merged data as a dictionary.
+    iterator that returns merged data from these readers
+    as a dictionary.
     '''
 
     def __init__(self, flight_reader, science_reader, merge_tolerance=1):
