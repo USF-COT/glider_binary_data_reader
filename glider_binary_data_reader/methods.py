@@ -21,7 +21,7 @@ def find_glider_BD_headers(reader):
     # Bleed off extraneous headers
     # Stop when sci_m_present_time is found
     line = reader.stdout.readline()
-    while line is not '' and line.find('sci_m_present_time') == -1:
+    while len(line) > 0 and line.find('m_present_time') == -1:
         line = reader.stdout.readline()
 
     if line is '':
@@ -80,9 +80,15 @@ def map_line(reader, headers):
     readings = {}
 
     line = reader.stdout.readline()
+
+    if len(line) == 0:
+        raise EOFError('That\'s all the data!')
+
+    line = line.rstrip()
+
     value_strings = line.split(' ')
     for i, string in enumerate(value_strings):
-        if string is not 'NaN':
+        if string != 'NaN':
             value = float(string)
 
             if i < len(headers):
