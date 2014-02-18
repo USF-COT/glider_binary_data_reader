@@ -5,6 +5,19 @@ from itertools import izip
 
 
 def create_glider_BD_ASCII_reader(path, fileType, fileNames=None):
+    """Creates a glider binary data reader
+
+    Arguments:
+    path - path to directory containing glider binary files.
+    fileType - type of *bd files to process.
+        Examples: 'dbd', 'ebd', 'sbd', 'tbd', 'mbd', or 'nbd'
+    fileNames - optional list of files to process.
+        If not specified, all files of type fileType in
+        path will be processed.
+
+    Returns a subprocess.Popen class to a dbd2asc call
+    """
+
     processArgs = ['dbd2asc', '-c', '/tmp']
 
     if fileNames is None or len(fileNames) > 50:
@@ -18,6 +31,12 @@ def create_glider_BD_ASCII_reader(path, fileType, fileNames=None):
 
 
 def find_glider_BD_headers(reader):
+    """Finds and returns available headers in a set of glider data files
+
+    Arguments:
+    reader - A raw glider binary data reader of type subprocess.Popen
+    """
+
     # Bleed off extraneous headers
     # Stop when sci_m_present_time is found
     line = reader.stdout.readline()
@@ -51,6 +70,15 @@ def find_glider_BD_headers(reader):
 
 
 def get_decimal_degrees(lat_lon):
+    """Converts glider gps coordinate ddmm.mmm to decimal degrees dd.ddd
+
+    Arguments:
+    lat_lon - A floating point latitude or longitude in the format ddmm.mmm
+        where dd's are degrees and mm.mmm is decimal minutes.
+
+    Returns decimal degrees float
+    """
+
     if lat_lon == 0:
         return -1
 
@@ -77,6 +105,13 @@ def get_decimal_degrees(lat_lon):
 
 
 def map_line(reader, headers):
+    """Maps all non-NaN values in a glider data file to a known header
+
+    Arguments:
+    reader - A subprocess.Popen with headers discovered
+    headers - Headers discovered in data file already
+    """
+
     readings = {}
 
     line = reader.stdout.readline()

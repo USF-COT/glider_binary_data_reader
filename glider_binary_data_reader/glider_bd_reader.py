@@ -6,11 +6,17 @@ from glider_binary_data_reader.methods import (
 
 
 class GliderBDReader(object):
-    '''
-    Starts a process to read through the data from
-    a set of glider binary data files.  Provides an iterator to
-    process a line of data at a time.
-    '''
+    """Reads a specified type or set of glider data files.
+
+    Starts a process to read through the data from a set of glider
+    binary data files.  Provides an iterator to process a line of
+    data at a time.
+
+    Arguments:
+    path - Directory where binary data is stored.
+    fileType - Types of files to process
+    fileNames - An optional set specifying exactly which files to process.
+    """
 
     def __init__(self, path, fileType, fileNames=None):
         self.reader = (
@@ -36,12 +42,19 @@ class GliderBDReader(object):
 
 
 class MergedGliderBDReader(object):
-    '''
+    """Merges flight and science data readers to return merged glider data.
+
     Takes two glider binary data readers: one for
     flight and one for science data.  Provides an
     iterator that returns merged data from these readers
     as a dictionary.
-    '''
+
+    Arguments:
+    flight_reader - A GliderBDReader object tied to flight data *bd files.
+    science_reader - A GliderBDReader object tied to science data *bd files.
+    merge_tolerance - An optional tolerance number of seconds to consider two
+        rows mergeable.  Default: 1
+    """
 
     def __init__(self, flight_reader, science_reader, merge_tolerance=1):
         self.flight_reader = flight_reader
