@@ -1,9 +1,15 @@
-Glider Binary Data Reader
-=========================
+# Glider Binary Data Reader
 
 Reads and merges Teledyne Webb Slocum Glider data from *bd flight and science files.
 
-Basic Usage:
+## Installation
+
+```
+git clone https://github.com/USF-COT/glider_binary_data_reader.git
+sudo python setup.py install
+```
+
+## Basic Usage
 
 ```
 from glider_binary_data_reader.glider_bd_reader import (
