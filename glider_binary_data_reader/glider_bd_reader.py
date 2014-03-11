@@ -61,6 +61,10 @@ class MergedGliderBDReader(object):
         self.science_reader = science_reader
         self.merge_tolerance = merge_tolerance
 
+        self.flight_headers = flight_reader.headers
+        self.science_headers = science_reader.headers
+        self.headers = self.flight_headers + self.science_headers
+
         self.__read_both_values()
 
     def __read_both_values(self):
@@ -89,10 +93,12 @@ class MergedGliderBDReader(object):
             # No more flight values. Spit out the rest of the science values.
             if self.flight_values is None:
                 ret_val = self.science_values
+                time_key = 'sci_m_present_time-timestamp'
                 self.__read_science_values()
             # No more science values. Spit out the rest of the flight values.
             elif self.science_values is None:
                 ret_val = self.flight_values
+                time_key = 'm_present_time-timestamp'
                 self.__read_flight_values()
             # We have both.  Time to merge.
             else:
@@ -107,6 +113,7 @@ class MergedGliderBDReader(object):
 
                 # Can merge because within tolerance
                 if time_diff <= self.merge_tolerance:
+                    time_key = 'm_present_time-timestamp'
                     ret_val = self.flight_values
                     ret_val.update(self.science_values)
                     self.__read_both_values()
@@ -114,12 +121,19 @@ class MergedGliderBDReader(object):
                 # Flight is ahead of science.  Return and get next science.
                 elif flight_time > science_time:
                     ret_val = self.science_values
+                    time_key = 'sci_m_present_time-timestamp'
                     self.__read_science_values()
 
                 # Science is ahead of flight.  Return and get next flight.
                 else:
                     ret_val = self.flight_values
+                    time_key = 'm_present_time-timestamp'
                     self.__read_flight_values()
+
+            # Provide generic timestamp regardless of type for iterator
+            # convenience
+            # Keep originals for those interested
+            ret_val['timestamp'] = ret_val[time_key]
 
             return ret_val
         else:

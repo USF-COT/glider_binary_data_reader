@@ -21,7 +21,7 @@ class TestASCIIReader(unittest.TestCase):
         )
 
     def test_single_read(self):
-        line = self.reader.stdout.readline()
+        line = self.reader.readline()
         self.assertEqual(
             line,
             'dbd_label: DBD_ASC(dinkum_binary_data_ascii)file\n'

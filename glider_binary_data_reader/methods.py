@@ -3,6 +3,8 @@ import subprocess
 from glob import glob
 from itertools import izip
 
+import tempfile
+
 
 def create_glider_BD_ASCII_reader(path, fileType, fileNames=None):
     """Creates a glider binary data reader
@@ -27,7 +29,11 @@ def create_glider_BD_ASCII_reader(path, fileType, fileNames=None):
         for fileName in fileNames:
             processArgs.append(fileName)
 
-    return subprocess.Popen(processArgs, stdout=subprocess.PIPE)
+    tmpFile = tempfile.TemporaryFile()
+    process = subprocess.Popen(processArgs, stdout=tmpFile)
+    process.wait()
+    tmpFile.seek(0)
+    return tmpFile
 
 
 def find_glider_BD_headers(reader):
@@ -39,16 +45,16 @@ def find_glider_BD_headers(reader):
 
     # Bleed off extraneous headers
     # Stop when sci_m_present_time is found
-    line = reader.stdout.readline()
+    line = reader.readline()
     while len(line) > 0 and line.find('m_present_time') == -1:
-        line = reader.stdout.readline()
+        line = reader.readline()
 
     if line is '':
         raise EOFError('No headers found before end of file.')
 
     headersTemp = line.split(' ')
 
-    unitsLine = reader.stdout.readline()
+    unitsLine = reader.readline()
     if unitsLine is not None:
         unitsTemp = unitsLine.split(' ')
     else:
@@ -64,7 +70,7 @@ def find_glider_BD_headers(reader):
         headers.append(description)
 
     # Remove extraneous bytes line
-    reader.stdout.readline()
+    reader.readline()
 
     return headers
 
@@ -114,7 +120,7 @@ def map_line(reader, headers):
 
     readings = {}
 
-    line = reader.stdout.readline()
+    line = reader.readline()
 
     if len(line) == 0:
         raise EOFError('That\'s all the data!')
