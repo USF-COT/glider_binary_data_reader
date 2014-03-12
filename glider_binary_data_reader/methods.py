@@ -6,6 +6,45 @@ from itertools import izip
 import tempfile
 
 
+def generate_tmpfile(processArgs):
+    tmpFile = tempfile.TemporaryFile()
+    process = subprocess.Popen(processArgs, stdout=tmpFile)
+    process.wait()
+    tmpFile.seek(0)
+
+    return tmpFile, process.returncode
+
+
+def process_all_of_type(path, fileType):
+    processArgs = ['dbd2asc', '-c', '/tmp']
+
+    filesWildCard = '%s/*.%s' % (path, fileType)
+    processArgs.extend(glob(filesWildCard))
+
+    tmpFile, returncode = generate_tmpfile(processArgs)
+
+    return tmpFile
+
+
+def process_file_list(path, fileType, fileNames):
+    processArgs = ['dbd2asc', '-c', '/tmp']
+
+    for fileName in fileNames:
+        filePath = '%s/%s' % (path, fileName)
+        processArgs.append(filePath)
+
+    tmpFile, returncode = generate_tmpfile(processArgs)
+
+    # Fallback in case the cache is not available
+    if returncode == 1:
+        # Generate cache by processing all files available of type
+        process_all_of_type(path, fileType)
+        # Reprocess the file list
+        tmpFile, returncode = generate_tmpfile(processArgs)
+
+    return tmpFile
+
+
 def create_glider_BD_ASCII_reader(path, fileType, fileNames=None):
     """Creates a glider binary data reader
 
@@ -20,20 +59,10 @@ def create_glider_BD_ASCII_reader(path, fileType, fileNames=None):
     Returns a subprocess.Popen class to a dbd2asc call
     """
 
-    processArgs = ['dbd2asc', '-c', '/tmp']
-
-    if fileNames is None or len(fileNames) > 50:
-        filesWildCard = '%s/*.%s' % (path, fileType)
-        processArgs.extend(glob(filesWildCard))
+    if fileNames is None:
+        return process_all_of_type(path, fileType)
     else:
-        for fileName in fileNames:
-            processArgs.append(fileName)
-
-    tmpFile = tempfile.TemporaryFile()
-    process = subprocess.Popen(processArgs, stdout=tmpFile)
-    process.wait()
-    tmpFile.seek(0)
-    return tmpFile
+        return process_file_list(path, fileType, fileNames)
 
 
 def find_glider_BD_headers(reader):
