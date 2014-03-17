@@ -8,7 +8,7 @@ import tempfile
 
 def generate_tmpfile(processArgs):
     tmpFile = tempfile.TemporaryFile()
-    process = subprocess.Popen(processArgs, stdout=tmpFile)
+    process = subprocess.Popen(processArgs, stdout=tmpFile, stderr=tmpFile)
     process.wait()
     tmpFile.seek(0)
 
@@ -165,10 +165,6 @@ def map_line(reader, headers):
                 if headers[i]['is_point']:
                     value = get_decimal_degrees(value)
                 key = headers[i]['name'] + "-" + headers[i]['units']
-                readings[key] = {
-                    'name': headers[i]['name'],
-                    'units': headers[i]['units'],
-                    'value': value
-                }
+                readings[key] = value
 
     return readings

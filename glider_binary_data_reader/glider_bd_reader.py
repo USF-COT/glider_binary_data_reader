@@ -104,10 +104,10 @@ class MergedGliderBDReader(object):
             else:
                 # To merge or not to merge
                 flight_time = (
-                    self.flight_values['m_present_time-timestamp']['value']
+                    self.flight_values['m_present_time-timestamp']
                 )
                 science_time = (
-                    self.science_values['sci_m_present_time-timestamp']['value']  # NOQA
+                    self.science_values['sci_m_present_time-timestamp']
                 )
                 time_diff = abs(flight_time - science_time)
 
