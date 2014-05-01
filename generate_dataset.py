@@ -63,6 +63,7 @@ def main():
         )
 
         for line in reader:
+            print line
             if args.all_rows:
                 writer.writerow(line)
             else:
