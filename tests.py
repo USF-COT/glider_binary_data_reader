@@ -16,7 +16,7 @@ class TestASCIIReader(unittest.TestCase):
 
     def setUp(self):
         self.reader = create_glider_BD_ASCII_reader(
-            '/home/localuser/glider_binary_data_reader/test_data',
+            'test_data',
             'sbd'
         )
 
@@ -48,7 +48,7 @@ class TestBDReader(unittest.TestCase):
 
     def setUp(self):
         self.reader = GliderBDReader(
-            '/home/localuser/glider_binary_data_reader/test_data',
+            'test_data',
             'tbd'
         )
 
@@ -64,11 +64,11 @@ class TestMergedGliderDataReader(unittest.TestCase):
 
     def setUp(self):
         flightReader = GliderBDReader(
-            '/home/localuser/glider_binary_data_reader/test_data',
+            'test_data',
             'sbd'
         )
         scienceReader = GliderBDReader(
-            '/home/localuser/glider_binary_data_reader/test_data',
+            'test_data',
             'tbd'
         )
         self.reader = MergedGliderBDReader(flightReader, scienceReader)
