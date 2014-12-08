@@ -75,6 +75,7 @@ class TestMergedGliderDataReader(unittest.TestCase):
 
     def test_iteration(self):
         for value in self.reader:
+            print value
             time_present = (
                 'sci_m_present_secs_into_mission-sec' in value
                 or 'm_present_secs_into_mission-sec' in value
