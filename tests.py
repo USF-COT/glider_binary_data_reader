@@ -6,7 +6,7 @@ from glider_binary_data_reader.methods import (
     get_decimal_degrees
 )
 
-from glider_binary_data_reader.glider_bd_reader import (
+from glider_binary_data_reader import (
     GliderBDReader,
     MergedGliderBDReader
 )

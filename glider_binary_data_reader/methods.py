@@ -5,8 +5,58 @@ from itertools import izip
 
 import tempfile
 
+import re
+import os
+
+
+def parse_glider_filename(filename):
+    """Parses a glider filename and returns details in a dictionary
+
+    Returns dictionary with the following keys:
+    * 'glider': glider name
+    * 'year': data file year created
+    * 'day': data file julian date created
+    * 'mission': data file mission id
+    * 'segment': data file segment id
+    * 'type': data file type
+    """
+
+    matches = re.search(
+        "([\w\d\-]+)-(\d+)-(\d+)-(\d+)-(\d+)\.(\w+)$", filename
+    )
+
+    if matches is not None:
+        return {
+            'glider': re.group(1),
+            'year': int(re.group(2)),
+            'day': int(re.group(3)),
+            'mission': int(re.group(4)),
+            'segment': int(re.group(5)),
+            'type': re.group(6)
+        }
+    else:
+        raise ValueError(
+            "Filename (%s) not in usual glider format: "
+            "<glider name>-<year>-<julian day>-"
+            "<mission>-<segment>.<extenstion>" % filename
+        )
+
+
+def generate_glider_filename(description):
+    """Converts a glider data file details dictionary to filename
+
+    """
+    return (
+        "%(glider)s-%(year)d-%(day)d-%(mission)d-%(segment)s.%(type)s"
+        % description
+    )
+
 
 def generate_tmpfile(processArgs):
+    """Runs a given process, outputs the result to a tmpfile.
+
+    Returns temp file path and process return code.
+    """
     tmpFile = tempfile.TemporaryFile()
     process = subprocess.Popen(processArgs, stdout=tmpFile, stderr=tmpFile)
     process.wait()
@@ -15,7 +65,55 @@ def generate_tmpfile(processArgs):
     return tmpFile, process.returncode
 
 
+def can_find_bd_index(path):
+    # Iterate through previous segment files
+    processArgs = ['dbd2asc', '-c', '/tmp', path]
+    returncode = 1
+    file_details = parse_glider_filename(path)
+    while returncode == 1 and file_details['segment'] > 0:
+        file_details['segment'] -= 0
+        processArgs[3] = generate_glider_filename(file_details)
+        process = subprocess.Popen(processArgs, stdout=None, stderr=None)
+        process.wait()
+        returncode = process.returncode
+
+    # Report whether index found or not
+    return returncode == 0
+
+
+def process_file(path):
+    """Processes a single glider data file.
+
+    Returns path to temp file and return code.
+
+    Intelligently falls back if previous index file has not
+    been processed for given data file.
+
+    Raises and exception if data index cannot be found for
+    given data file.
+    """
+
+    processArgs = ['dbd2asc', '-c', '/tmp', path]
+
+    tmpFile, returncode = generate_tmpfile(processArgs)
+
+    # Fallback to find index bd file
+    if returncode == 1:
+        if can_find_bd_index(path):
+            tmpFile, returncode = generate_tmpfile(processArgs)
+        else:
+            raise KeyError("Cannot find data file index for: %s" % path)
+
+    return tmpFile
+
+
 def process_all_of_type(path, fileType):
+    """Process glider data files of one type
+
+    No fallback.  Assumed that operation big enough
+    to avoid this issue.
+    """
+
     processArgs = ['dbd2asc', '-c', '/tmp']
 
     filesWildCard = '%s/*.%s' % (path, fileType)
@@ -27,18 +125,32 @@ def process_all_of_type(path, fileType):
 
 
 def process_file_list(path, fileType, fileNames):
+    """Process a list of glider data files to ASCII.
+
+    Intelligently falls back for each file if necessary.
+
+    Raises KeyError exception if it cannot generate an index for a
+    given file.
+
+    Returns temp file and return code.
+    """
+
     processArgs = ['dbd2asc', '-c', '/tmp']
 
     for fileName in fileNames:
-        filePath = '%s/%s' % (path, fileName)
+        filePath = os.path.join(path, fileName)
         processArgs.append(filePath)
 
     tmpFile, returncode = generate_tmpfile(processArgs)
 
     # Fallback in case the cache is not available
     if returncode == 1:
-        # Generate cache by processing all files available of type
-        process_all_of_type(path, fileType)
+        for filePath in processArgs[3:]:
+            if not can_find_bd_index(filePath):
+                raise KeyError(
+                    "Cannot find data file index for: %s" % filePath
+                )
+
         # Reprocess the file list
         tmpFile, returncode = generate_tmpfile(processArgs)
 
