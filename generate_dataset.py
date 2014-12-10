@@ -1,4 +1,4 @@
-from glider_binary_data_reader.glider_bd_reader import GliderBDReader
+from glider_binary_data_reader import GliderBDReader
 
 import argparse
 import csv
