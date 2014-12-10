@@ -21,18 +21,21 @@ def parse_glider_filename(filename):
     * 'type': data file type
     """
 
+    head, tail = os.path.split(filename)
+
     matches = re.search(
-        "([\w\d\-]+)-(\d+)-(\d+)-(\d+)-(\d+)\.(\w+)$", filename
+        "([\w\d\-]+)-(\d+)-(\d+)-(\d+)-(\d+)\.(\w+)$", tail
     )
 
     if matches is not None:
         return {
-            'glider': re.group(1),
-            'year': int(re.group(2)),
-            'day': int(re.group(3)),
-            'mission': int(re.group(4)),
-            'segment': int(re.group(5)),
-            'type': re.group(6)
+            'path': head,
+            'glider': matches.group(1),
+            'year': int(matches.group(2)),
+            'day': int(matches.group(3)),
+            'mission': int(matches.group(4)),
+            'segment': int(matches.group(5)),
+            'type': matches.group(6)
         }
     else:
         raise ValueError(
@@ -46,10 +49,11 @@ def generate_glider_filename(description):
     """Converts a glider data file details dictionary to filename
 
     """
-    return (
+    filename = (
         "%(glider)s-%(year)d-%(day)d-%(mission)d-%(segment)s.%(type)s"
         % description
     )
+    return os.path.join(description['path'], filename)
 
 
 def generate_tmpfile(processArgs):
@@ -70,12 +74,12 @@ def can_find_bd_index(path):
     processArgs = ['dbd2asc', '-c', '/tmp', path]
     returncode = 1
     file_details = parse_glider_filename(path)
-    while returncode == 1 and file_details['segment'] > 0:
-        file_details['segment'] -= 0
+    while returncode == 1 and file_details['segment'] >= 0:
         processArgs[3] = generate_glider_filename(file_details)
         process = subprocess.Popen(processArgs, stdout=None, stderr=None)
         process.wait()
         returncode = process.returncode
+        file_details['segment'] -= 1
 
     # Report whether index found or not
     return returncode == 0

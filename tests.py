@@ -75,7 +75,39 @@ class TestMergedGliderDataReader(unittest.TestCase):
 
     def test_iteration(self):
         for value in self.reader:
-            print value
+            time_present = (
+                'sci_m_present_secs_into_mission-sec' in value
+                or 'm_present_secs_into_mission-sec' in value
+            )
+            self.assertTrue(time_present)
+
+
+import os
+from glob import glob
+
+
+class TestNoCacheAvailable(unittest.TestCase):
+
+    def setUp(self):
+        # Remove all cache files
+        for fileName in glob("/tmp/*.cac"):
+            os.remove(fileName)
+
+        # Create readers
+        flightReader = GliderBDReader(
+            'test_data',
+            'sbd',
+            fileNames=["usf-bass-2014-212-2-10.sbd"]
+        )
+        scienceReader = GliderBDReader(
+            'test_data',
+            'tbd',
+            fileNames=["usf-bass-2014-212-2-10.tbd"]
+        )
+        self.reader = MergedGliderBDReader(flightReader, scienceReader)
+
+    def test_iteration(self):
+        for value in self.reader:
             time_present = (
                 'sci_m_present_secs_into_mission-sec' in value
                 or 'm_present_secs_into_mission-sec' in value
