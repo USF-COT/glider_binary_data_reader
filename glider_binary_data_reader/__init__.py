@@ -18,9 +18,9 @@ class GliderBDReader(object):
     fileNames - An optional set specifying exactly which files to process.
     """
 
-    def __init__(self, path, fileType, fileNames=None):
+    def __init__(self, filePaths):
         self.reader = (
-            create_glider_BD_ASCII_reader(path, fileType, fileNames)
+            create_glider_BD_ASCII_reader(filePaths)
         )
 
         self.headers = find_glider_BD_headers(self.reader)

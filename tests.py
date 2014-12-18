@@ -11,13 +11,14 @@ from glider_binary_data_reader import (
     MergedGliderBDReader
 )
 
+from glob import glob
+
 
 class TestASCIIReader(unittest.TestCase):
 
     def setUp(self):
         self.reader = create_glider_BD_ASCII_reader(
-            'test_data',
-            'sbd'
+            glob('test_data/*.sbd')
         )
 
     def test_single_read(self):
@@ -48,8 +49,7 @@ class TestBDReader(unittest.TestCase):
 
     def setUp(self):
         self.reader = GliderBDReader(
-            'test_data',
-            'tbd'
+            glob('test_data/*.tbd')
         )
 
     def test_iteration(self):
@@ -64,12 +64,10 @@ class TestMergedGliderDataReader(unittest.TestCase):
 
     def setUp(self):
         flightReader = GliderBDReader(
-            'test_data',
-            'sbd'
+            glob('test_data/*.sbd')
         )
         scienceReader = GliderBDReader(
-            'test_data',
-            'tbd'
+            glob('test_data/*.tbd')
         )
         self.reader = MergedGliderBDReader(flightReader, scienceReader)
 
@@ -83,7 +81,6 @@ class TestMergedGliderDataReader(unittest.TestCase):
 
 
 import os
-from glob import glob
 
 
 class TestNoCacheAvailable(unittest.TestCase):
@@ -95,14 +92,10 @@ class TestNoCacheAvailable(unittest.TestCase):
 
         # Create readers
         flightReader = GliderBDReader(
-            'test_data',
-            'sbd',
-            fileNames=["usf-bass-2014-212-2-10.sbd"]
+            ["test_data/usf-bass-2014-212-2-10.sbd"]
         )
         scienceReader = GliderBDReader(
-            'test_data',
-            'tbd',
-            fileNames=["usf-bass-2014-212-2-10.tbd"]
+            ["test_data/usf-bass-2014-212-2-10.tbd"]
         )
         self.reader = MergedGliderBDReader(flightReader, scienceReader)
 

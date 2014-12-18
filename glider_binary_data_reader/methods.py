@@ -128,7 +128,7 @@ def process_all_of_type(path, fileType):
     return tmpFile
 
 
-def process_file_list(path, fileType, fileNames):
+def process_file_list(filePaths):
     """Process a list of glider data files to ASCII.
 
     Intelligently falls back for each file if necessary.
@@ -141,15 +141,14 @@ def process_file_list(path, fileType, fileNames):
 
     processArgs = ['dbd2asc', '-c', '/tmp']
 
-    for fileName in fileNames:
-        filePath = os.path.join(path, fileName)
+    for filePath in filePaths:
         processArgs.append(filePath)
 
     tmpFile, returncode = generate_tmpfile(processArgs)
 
     # Fallback in case the cache is not available
     if returncode == 1:
-        for filePath in processArgs[3:]:
+        for filePath in filePaths:
             if not can_find_bd_index(filePath):
                 raise KeyError(
                     "Cannot find data file index for: %s" % filePath
@@ -161,24 +160,15 @@ def process_file_list(path, fileType, fileNames):
     return tmpFile
 
 
-def create_glider_BD_ASCII_reader(path, fileType, fileNames=None):
-    """Creates a glider binary data reader
+def create_glider_BD_ASCII_reader(filePaths):
+    """Creates a glider binary data reader over a set of files
 
     Arguments:
-    path - path to directory containing glider binary files.
-    fileType - type of *bd files to process.
-        Examples: 'dbd', 'ebd', 'sbd', 'tbd', 'mbd', or 'nbd'
-    fileNames - optional list of files to process.
-        If not specified, all files of type fileType in
-        path will be processed.
+        filePaths - An array of full paths to glider binary data files
 
     Returns a subprocess.Popen class to a dbd2asc call
     """
-
-    if fileNames is None:
-        return process_all_of_type(path, fileType)
-    else:
-        return process_file_list(path, fileType, fileNames)
+    return process_file_list(filePaths)
 
 
 def find_glider_BD_headers(reader):
