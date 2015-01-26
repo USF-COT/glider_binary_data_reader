@@ -11,7 +11,7 @@ sudo python setup.py install
 
 ## Basic Usage
 
-```
+```python
 from glider_binary_data_reader.glider_bd_reader import (
     GliderBDReader,
     MergedGliderBDReader
