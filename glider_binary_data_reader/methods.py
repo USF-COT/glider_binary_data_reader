@@ -50,7 +50,7 @@ def generate_glider_filename(description):
 
     """
     filename = (
-        "%(glider)s-%(year)d-%(day)d-%(mission)d-%(segment)s.%(type)s"
+        "%(glider)s-%(year)d-%(day)03d-%(mission)d-%(segment)s.%(type)s"
         % description
     )
     return os.path.join(description['path'], filename)
