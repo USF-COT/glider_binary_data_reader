@@ -277,7 +277,7 @@ def map_line(reader, headers):
     # convenience
     # Keep originals for those interested
     if 'm_present_time-timestamp' in readings:
-        readings['timestamp'] = readings['sci_m_present_time-timestamp']
+        readings['timestamp'] = readings['m_present_time-timestamp']
     elif 'sci_m_present_time-timestamp' in readings:
         readings['timestamp'] = readings['sci_m_present_time-timestamp']
 
