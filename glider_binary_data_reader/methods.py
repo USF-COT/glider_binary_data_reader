@@ -273,4 +273,12 @@ def map_line(reader, headers):
                 key = headers[i]['name'] + "-" + headers[i]['units']
                 readings[key] = value
 
+    # Provide generic timestamp regardless of type for iterator
+    # convenience
+    # Keep originals for those interested
+    if 'm_present_time-timestamp' in readings:
+        readings['timestamp'] = readings['sci_m_present_time-timestamp']
+    elif 'sci_m_present_time-timestamp' in readings:
+        readings['timestamp'] = readings['sci_m_present_time-timestamp']
+
     return readings
